@@ -4,11 +4,14 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, Legend 
 } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, Wallet, Clock } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Wallet, Clock, Sparkles, Loader2 } from 'lucide-react';
+import { GoogleGenAI } from "@google/genai";
 
 const Dashboard: React.FC = () => {
   const { state } = useAppContext();
   const [isMounted, setIsMounted] = useState(false);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -18,6 +21,37 @@ const Dashboard: React.FC = () => {
   const totalExpenses = state.expenses.reduce((sum, e) => sum + e.amount, 0);
   const totalBalance = totalIncome - totalExpenses;
   const pendingPayments = state.projects.reduce((sum, p) => sum + p.dueAmount, 0);
+
+  const getAIInsights = async () => {
+    setIsGenerating(true);
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const prompt = `Analyze this financial data for a creative business:
+        Total Income: ${state.profile.currency} ${totalIncome}
+        Total Expenses: ${state.profile.currency} ${totalExpenses}
+        Net Balance: ${state.profile.currency} ${totalBalance}
+        Pending Receivables: ${state.profile.currency} ${pendingPayments}
+        Number of active projects: ${state.projects.length}
+        
+        Provide 3 concise, professional bullet points of advice to improve profitability or cash flow.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: prompt,
+        config: {
+          systemInstruction: "You are a senior financial advisor for creative professionals. Provide high-level, actionable, and encouraging business advice.",
+          temperature: 0.7,
+        }
+      });
+
+      setAiInsight(response.text || "Unable to generate insights at this moment.");
+    } catch (error) {
+      console.error("AI Generation Error:", error);
+      setAiInsight("Connect your Gemini API key to receive personalized financial insights.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const barData = useMemo(() => [
     { name: 'Jan', income: 4000, expenses: 2400 },
@@ -56,6 +90,45 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* AI Insights Panel */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-violet-700 rounded-2xl p-6 shadow-xl border border-white/10 text-white">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="max-w-2xl">
+            <div className="flex items-center space-x-2 mb-2">
+              <Sparkles className="text-amber-300 animate-pulse" size={24} />
+              <h3 className="text-lg font-bold">ProFin AI Advisor</h3>
+            </div>
+            {aiInsight ? (
+              <div className="text-indigo-50 bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/5 animate-in fade-in zoom-in duration-500">
+                <p className="whitespace-pre-line text-sm leading-relaxed">{aiInsight}</p>
+                <button 
+                  onClick={() => setAiInsight(null)}
+                  className="mt-4 text-xs font-bold uppercase tracking-wider opacity-60 hover:opacity-100 transition-opacity"
+                >
+                  Refresh Analysis
+                </button>
+              </div>
+            ) : (
+              <p className="text-indigo-100 text-sm">
+                Get real-time financial analysis and business growth tips based on your current revenue and spending patterns.
+              </p>
+            )}
+          </div>
+          {!aiInsight && (
+            <button 
+              onClick={getAIInsights}
+              disabled={isGenerating}
+              className="flex items-center justify-center space-x-2 bg-white text-indigo-700 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-indigo-50 transition-all active:scale-95 disabled:opacity-50"
+            >
+              {isGenerating ? <Loader2 className="animate-spin" size={20} /> : <Sparkles size={20} />}
+              <span>{isGenerating ? 'Analyzing...' : 'Generate Insights'}</span>
+            </button>
+          )}
+        </div>
+        {/* Background Decorative Circles */}
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <div key={stat.id} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-lg">

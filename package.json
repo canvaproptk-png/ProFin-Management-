@@ -1,8 +1,8 @@
 {
   "name": "profin-management",
-  "version": "1.2.3",
+  "version": "1.3.0",
   "private": true,
-  "description": "Professional Income and Expense Management Suite",
+  "description": "Professional Income and Expense Management Suite with AI Insights",
   "scripts": {
     "build": "mkdir -p dist && cp -r components App.tsx AppContext.tsx index.html index.tsx metadata.json types.ts dist/ && echo '/* /index.html 200' > dist/_redirects"
   },
@@ -10,6 +10,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "lucide-react": "^0.562.0",
-    "recharts": "^2.12.0"
+    "recharts": "^2.12.0",
+    "@google/genai": "^0.2.1"
   }
 }

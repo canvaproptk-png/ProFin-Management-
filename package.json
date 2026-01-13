@@ -1,10 +1,10 @@
 {
   "name": "profin-management",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "private": true,
   "description": "Professional Income and Expense Management Suite",
   "scripts": {
-    "build": "mkdir -p public && cp -r components App.tsx AppContext.tsx index.html index.tsx metadata.json types.ts vercel.json public/ || true"
+    "build": "mkdir -p dist && cp -r components App.tsx AppContext.tsx index.html index.tsx metadata.json types.ts dist/ && echo '/* /index.html 200' > dist/_redirects"
   },
   "dependencies": {
     "react": "^19.0.0",

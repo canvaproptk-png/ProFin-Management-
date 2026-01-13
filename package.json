@@ -1,10 +1,10 @@
 {
   "name": "profin-management",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Professional Income and Expense Management Suite",
   "scripts": {
-    "build": "echo 'Deploying static ES modules to Vercel...'"
+    "build": "echo 'Deploying as a static site from root...'"
   },
   "dependencies": {
     "react": "^19.0.0",

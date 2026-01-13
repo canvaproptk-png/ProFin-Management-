@@ -10,8 +10,7 @@ const Dashboard: React.FC = () => {
   const { state } = useAppContext();
   const [isMounted, setIsMounted] = useState(false);
 
-  // Recharts sometimes triggers warnings if rendered before the container has dimensions.
-  // Using a mount check ensures the DOM is ready.
+  // Recharts width(-1) fix: only render charts once the component has mounted in the DOM.
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -58,15 +57,14 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <div key={stat.id} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1">
+          <div key={stat.id} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <div className={`${stat.bg} p-3 rounded-xl`}>
                 <stat.icon className={stat.color} size={24} />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Lifetime</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Net</span>
             </div>
             <h3 className="text-slate-500 dark:text-slate-400 text-sm font-medium">{stat.label}</h3>
             <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
@@ -76,10 +74,9 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm min-w-0 w-full overflow-hidden flex flex-col">
-          <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">Revenue vs Burn</h3>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm min-w-0 w-full flex flex-col">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">Revenue Analysis</h3>
           <div className="h-[300px] w-full flex-1 min-h-[300px] relative">
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%" debounce={100}>
@@ -89,18 +86,18 @@ const Dashboard: React.FC = () => {
                   <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip 
                     cursor={{fill: 'rgba(99, 102, 241, 0.05)'}}
-                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff', fontSize: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
                   />
-                  <Bar dataKey="income" fill="#10b981" radius={[6, 6, 0, 0]} barSize={18} />
-                  <Bar dataKey="expenses" fill="#f43f5e" radius={[6, 6, 0, 0]} barSize={18} />
+                  <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={16} />
+                  <Bar dataKey="expenses" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={16} />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm min-w-0 w-full overflow-hidden flex flex-col">
-          <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">Spending Breakdown</h3>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm min-w-0 w-full flex flex-col">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">Expense Distribution</h3>
           <div className="h-[300px] w-full flex-1 min-h-[300px] relative">
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%" debounce={100}>
@@ -108,10 +105,10 @@ const Dashboard: React.FC = () => {
                   <Pie
                     data={pieData}
                     cx="50%"
-                    cy="40%"
-                    innerRadius={65}
-                    outerRadius={90}
-                    paddingAngle={8}
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={85}
+                    paddingAngle={5}
                     dataKey="value"
                     stroke="none"
                   >
@@ -122,7 +119,7 @@ const Dashboard: React.FC = () => {
                   <Tooltip 
                      contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#fff', fontSize: '12px' }}
                   />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                 </PieChart>
               </ResponsiveContainer>
             )}
@@ -130,36 +127,33 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Transaction Feed */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
           <h3 className="text-lg font-bold text-slate-800 dark:text-white">Recent Transactions</h3>
-          <span className="text-xs font-medium text-slate-400">Last 5 entries</span>
+          <span className="text-xs font-medium text-slate-400">Total Activities</span>
         </div>
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
           {recentTransactions.map((tx) => (
-            <div key={`tx-${tx.id}`} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
+            <div key={`tx-feed-${tx.id}`} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
               <div className="flex items-center space-x-4">
-                <div className={`p-2.5 rounded-xl transition-transform group-hover:scale-110 ${tx.txType === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                <div className={`p-2 rounded-xl ${tx.txType === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
                   {tx.txType === 'income' ? <ArrowUpRight size={20} /> : <ArrowDownRight size={20} />}
                 </div>
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-white truncate max-w-[140px] sm:max-w-none">
-                    {'description' in tx ? tx.description : 'Service Fulfillment'}
+                    {'description' in tx ? tx.description : 'Payment Received'}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(tx.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(tx.date).toLocaleDateString()}</p>
                 </div>
               </div>
-              <p className={`font-bold text-lg whitespace-nowrap ${tx.txType === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <p className={`font-bold text-base ${tx.txType === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {tx.txType === 'income' ? '+' : '-'} {state.profile.currency} {tx.amount.toLocaleString()}
               </p>
             </div>
           ))}
           {recentTransactions.length === 0 && (
-            <div className="p-16 text-center text-slate-500 dark:text-slate-400">
-              <Clock size={48} className="mx-auto mb-4 opacity-10" />
-              <p className="text-sm font-medium">Your financial journey starts here.</p>
-              <p className="text-xs opacity-60">Add some income or expenses to see them listed.</p>
+            <div className="p-12 text-center text-slate-400">
+              <p className="text-sm">No transaction data yet.</p>
             </div>
           )}
         </div>
